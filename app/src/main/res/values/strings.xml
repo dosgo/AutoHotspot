@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">自动热点</string>
+    <!-- Settings Activity Title -->
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <string name="sync_header">设置</string>
+
+    <!-- Messages Preferences -->
+
+    <!-- Sync Preferences -->
+    <string name="attachment_title">wifi热点开关</string>
+    <string name="attachment_summary_on">自动启动wifi热点
+    </string>
+    <string name="attachment_summary_off">不启动wifi热点</string>
+</resources>
