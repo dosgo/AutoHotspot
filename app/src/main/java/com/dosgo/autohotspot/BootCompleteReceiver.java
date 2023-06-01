@@ -12,7 +12,7 @@ public class BootCompleteReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")){
-            Toast.makeText(context, "Device restarted", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Auto Hotspot start", Toast.LENGTH_SHORT).show();
             SharedPreferences editor = PreferenceManager.getDefaultSharedPreferences(context);
             boolean hotspotSwitch=editor.getBoolean("hotspotSwitch",false);
             if(hotspotSwitch) {

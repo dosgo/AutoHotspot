@@ -8,8 +8,11 @@
     <!-- Messages Preferences -->
 
     <!-- Sync Preferences -->
-    <string name="attachment_title">wifi热点开关</string>
-    <string name="attachment_summary_on">自动启动wifi热点
-    </string>
+    <string name="attachment_title">wifi热点自启动</string>
+    <string name="attachment_summary_on">自动启动wifi热点</string>
     <string name="attachment_summary_off">不启动wifi热点</string>
+
+    <string name="hotspot_title">热点开关</string>
+    <string name="hotspot_on">wifi热点已打开</string>
+    <string name="hotspot_off">wifi热点已关闭</string>
 </resources>
