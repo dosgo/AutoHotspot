@@ -1,5 +1,6 @@
 package com.dosgo.autohotspot;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -24,8 +25,8 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
+        Context directBootContext = this.createDeviceProtectedStorageContext();
+        SharedPreferences sharedPreferences = directBootContext.getSharedPreferences(   this.getPackageName() + "_preferences", Context.MODE_PRIVATE);
         // 注册添加设置的项数据发生变化时候的监听
         sharedPreferences.registerOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
 
@@ -34,6 +35,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static class SettingsFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            getPreferenceManager().setStorageDeviceProtected();
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
         }
     }

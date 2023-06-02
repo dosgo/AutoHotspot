@@ -10,14 +10,17 @@ import androidx.preference.PreferenceManager;
 
 public class BootCompleteReceiver extends BroadcastReceiver {
     @Override
-    public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")){
-            Toast.makeText(context, "Auto Hotspot start", Toast.LENGTH_SHORT).show();
-            SharedPreferences editor = PreferenceManager.getDefaultSharedPreferences(context);
-            boolean hotspotSwitch=editor.getBoolean("hotspotSwitch",false);
-            if(hotspotSwitch) {
-                Tethering.startTethering(context);
-            }
+    public void onReceive(Context _context, Intent intent) {
+        Context context=_context;
+        Context directBootContext = _context.createDeviceProtectedStorageContext();
+        if(Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(intent.getAction())){
+            context=directBootContext;
         }
+        SharedPreferences sharedPreferences = directBootContext.getSharedPreferences(context.getPackageName() + "_preferences", Context.MODE_PRIVATE);
+        boolean hotspotSwitch=sharedPreferences.getBoolean("hotspotSwitch",false);
+        if(hotspotSwitch) {
+            Tethering.startTethering(context);
+        }
+        Toast.makeText(context, "Auto Hotspot start", Toast.LENGTH_SHORT).show();
     }
 }
