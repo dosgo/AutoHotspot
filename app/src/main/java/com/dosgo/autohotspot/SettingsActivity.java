@@ -3,13 +3,17 @@ package com.dosgo.autohotspot;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.content.Intent;
+import android.net.Uri;
+import android.provider.Settings;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 public class SettingsActivity extends AppCompatActivity {
-    private MyOnSharedPreferenceChangeListener mOnSharedPreferenceChangeListener = new MyOnSharedPreferenceChangeListener();
+    private final MyOnSharedPreferenceChangeListener mOnSharedPreferenceChangeListener =
+            new MyOnSharedPreferenceChangeListener();
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +30,30 @@ public class SettingsActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         Context directBootContext = this.createDeviceProtectedStorageContext();
-        SharedPreferences sharedPreferences = directBootContext.getSharedPreferences(   this.getPackageName() + "_preferences", Context.MODE_PRIVATE);
+        preferences = directBootContext.getSharedPreferences(
+                this.getPackageName() + "_preferences", Context.MODE_PRIVATE);
         // 注册添加设置的项数据发生变化时候的监听
-        sharedPreferences.registerOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
+        preferences.registerOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
+        if (preferences.getBoolean("hotspotSwitch", false)) {
+            HotspotScheduler.schedule(this);
+        }
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (preferences != null && preferences.getBoolean("hotspotSwitch", false)) {
+            HotspotScheduler.checkNow(this);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (preferences != null) {
+            preferences.unregisterOnSharedPreferenceChangeListener(
+                    mOnSharedPreferenceChangeListener);
+        }
+        super.onDestroy();
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -44,8 +68,20 @@ public class SettingsActivity extends AppCompatActivity {
     private class MyOnSharedPreferenceChangeListener implements SharedPreferences.OnSharedPreferenceChangeListener {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (key.equals("hotspotStatus")) {
-
+            if (key.equals("hotspotSwitch")) {
+                boolean enabled = sharedPreferences.getBoolean("hotspotSwitch", false);
+                if (enabled) {
+                    HotspotScheduler.schedule(SettingsActivity.this);
+                    HotspotScheduler.checkNow(SettingsActivity.this);
+                    if (!Settings.System.canWrite(SettingsActivity.this)) {
+                        Intent intent = new Intent(
+                                Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                                Uri.parse("package:" + getPackageName()));
+                        startActivity(intent);
+                    }
+                } else {
+                    HotspotScheduler.cancel(SettingsActivity.this);
+                }
             }
         }
     }

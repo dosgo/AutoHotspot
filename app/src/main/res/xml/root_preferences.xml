@@ -9,6 +9,13 @@
             app:summaryOn="@string/attachment_summary_on"
             app:title="@string/attachment_title" />
 
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:dependency="hotspotSwitch"
+            app:key="rootForceSwitch"
+            app:summary="@string/root_force_summary"
+            app:title="@string/root_force_title" />
+
 
     </PreferenceCategory>
 

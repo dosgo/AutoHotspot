@@ -8,9 +8,11 @@
     <!-- Messages Preferences -->
 
     <!-- Sync Preferences -->
-    <string name="attachment_title">wifi热点自启动</string>
-    <string name="attachment_summary_on">自动启动wifi热点</string>
-    <string name="attachment_summary_off">不启动wifi热点</string>
+    <string name="attachment_title">Wi-Fi 热点自动守护</string>
+    <string name="attachment_summary_on">每 15 分钟检测，关闭时自动打开</string>
+    <string name="attachment_summary_off">不自动检查或打开热点</string>
+    <string name="root_force_title">Root 强制模式</string>
+    <string name="root_force_summary">检测到 Root 时授权并强制尝试打开热点</string>
 
     <string name="hotspot_title">热点开关</string>
     <string name="hotspot_on">wifi热点已打开</string>

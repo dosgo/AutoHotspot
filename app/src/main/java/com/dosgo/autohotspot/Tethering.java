@@ -1,7 +1,10 @@
 package com.dosgo.autohotspot;
 
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,6 +16,49 @@ import android.util.Log;
 public class Tethering {
 
     private static final String TAG = Tethering.class.getSimpleName();
+    private static final int WIFI_AP_STATE_ENABLED = 13;
+    private static final String WIFI_AP_STATE_CHANGED_ACTION = "android.net.wifi.WIFI_AP_STATE_CHANGED";
+    private static final String EXTRA_WIFI_AP_STATE = "wifi_state";
+
+    public static void ensureHotspotEnabled(Context context, boolean useRoot) {
+        if (isHotspotEnabled(context)) {
+            Log.d(TAG, "热点已开启，无需处理");
+            return;
+        }
+
+        if (useRoot && RootShell.isAvailable()) {
+            // Android 11 的 TetheringManager 接受 WRITE_SETTINGS。Root 模式先授予对应
+            // AppOps，再调用系统热点接口；新系统另外尝试 connectivity shell 命令。
+            RootShell.execute("appops set " + context.getPackageName()
+                    + " android:write_settings allow");
+            RootShell.execute("cmd connectivity tether start wifi");
+        }
+        startTethering(context);
+    }
+
+    public static boolean isHotspotEnabled(Context context) {
+        try {
+            Intent state = context.registerReceiver(null, new IntentFilter(WIFI_AP_STATE_CHANGED_ACTION));
+            if (state != null
+                    && state.getIntExtra(EXTRA_WIFI_AP_STATE, -1) == WIFI_AP_STATE_ENABLED) {
+                return true;
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "无法从广播读取热点状态", e);
+        }
+
+        try {
+            WifiManager wifiManager = (WifiManager) context.getApplicationContext()
+                    .getSystemService(Context.WIFI_SERVICE);
+            Method getWifiApState = wifiManager.getClass().getDeclaredMethod("getWifiApState");
+            getWifiApState.setAccessible(true);
+            Object state = getWifiApState.invoke(wifiManager);
+            return state instanceof Integer && (Integer) state == WIFI_AP_STATE_ENABLED;
+        } catch (Exception e) {
+            Log.d(TAG, "无法通过 WifiManager 读取热点状态", e);
+            return false;
+        }
+    }
 
     public static void startTethering(Context mContext) {
         ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
